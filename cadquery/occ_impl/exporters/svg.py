@@ -144,8 +144,6 @@ def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
     else:
         raise ValueError(f"view input must be either a tuple or one these string options: {[key for key in views.keys()]}")
 
-    DEFAULT_DIR = gp_Dir(-1.75, 1.1, 5)
-
     d = {"width": 800, "height": 240, "marginLeft": 200, "marginTop": 20}
 
     if opts:

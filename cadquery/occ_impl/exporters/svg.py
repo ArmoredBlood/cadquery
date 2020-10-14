@@ -129,16 +129,17 @@ def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
     """
         Export a shape to SVG
     """
-    
+
     ORIGIN_MARKER = '' if hideOrigin else ORIGIN_MARKER
 
     # view orientation assumes Z points upward, X ponts to the left/right, and Y points into the screen.
     views = {
-        'top' : (0, 0, 0),
-        'bottom' : (0, 0, 0),
-        'left' : (0, 0, 0),
-        'right' : (0, 0, 0),
-        'back' : (0, 0, 0),
+        'top' : (0, 0, -1),
+        'bottom' : (0, 0, 1),
+        'left' : (1, 0, 0),
+        'right' : (-1, 0, 0),
+        'front' : (0, 1, 0),
+        'back' : (0, -1, 0),
         'isometric' : (-1.75, 1.1, 5) # default to preserve backwards compatibility
     }
 
@@ -147,7 +148,7 @@ def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
     elif isinstance(view, tuple):
         view = gp_Dir(*view)
     else:
-        raise ValueError(f"view input must be either a tuple or one these string options: {[key for key in views.keys()]}")
+        raise ValueError(f"svg.py:getSVG(): view input must be either a tuple or one these string options: {[key for key in views.keys()]}")
 
     d = {"width": 800, "height": 240, "marginLeft": 200, "marginTop": 20}
 

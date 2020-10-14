@@ -31,7 +31,11 @@ SVG_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 %(visibleContent)s
        </g>
     </g>
-    <g transform="translate(20,%(textboxY)s)" stroke="rgb(0,0,255)">
+%(originMarker)s
+</svg>
+"""
+
+ORIGIN_MARKER = """    <g transform="translate(20,%(textboxY)s)" stroke="rgb(0,0,255)">
         <line x1="30" y1="-30" x2="75" y2="-33" stroke-width="3" stroke="#000000" />
          <text x="80" y="-30" style="stroke:#000000">X </text>
 
@@ -45,7 +49,6 @@ SVG_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
             <text x="0" y="20" style="stroke:#000000">1  %(uom)s </text>
         -->
     </g>
-</svg>
 """
 
 PATHTEMPLATE = '\t\t\t<path d="%s" />\n'
@@ -126,6 +129,8 @@ def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
     """
         Export a shape to SVG
     """
+    
+    ORIGIN_MARKER = '' if hideOrigin else ORIGIN_MARKER
 
     # view orientation assumes Z points upward, X ponts to the left/right, and Y points into the screen.
     views = {
@@ -236,6 +241,7 @@ def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
             "height": str(height),
             "textboxY": str(height - 30),
             "uom": str(uom),
+            "originMarker" : str(ORIGIN_MARKER),
         }
     )
     # svg = SVG_TEMPLATE % (

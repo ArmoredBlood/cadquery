@@ -936,7 +936,7 @@ class Workplane(object):
         :type opts: dictionary, width and height
         :return: a string that contains SVG that represents this item.
         """
-        return getSVG(self.val(), opts)
+        return getSVG(shape=self.val(), opts=opts)
 
     def exportSvg(self, fileName: str) -> None:
         """

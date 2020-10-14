@@ -11,7 +11,6 @@ from OCP.HLRAlgo import HLRAlgo_Projector
 from OCP.GCPnts import GCPnts_QuasiUniformDeflection
 
 DISCRETIZATION_TOLERANCE = 1e-3
-DEFAULT_DIR = gp_Dir(-1.75, 1.1, 5)
 
 SVG_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
@@ -123,10 +122,29 @@ def getPaths(visibleShapes, hiddenShapes):
     return (hiddenPaths, visiblePaths)
 
 
-def getSVG(shape, opts=None):
+def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
     """
         Export a shape to SVG
     """
+
+    # view orientation assumes Z points upward, X ponts to the left/right, and Y points into the screen.
+    views = {
+        'top' : (0, 0, 0),
+        'bottom' : (0, 0, 0),
+        'left' : (0, 0, 0),
+        'right' : (0, 0, 0),
+        'back' : (0, 0, 0),
+        'isometric' : (-1.75, 1.1, 5) # default to preserve backwards compatibility
+    }
+
+    if isinstance(view, str) and view in views.keys():
+        view = gp_Dir(*views[view])
+    elif isinstance(view, tuple):
+        view = gp_Dir(*view)
+    else:
+        raise ValueError(f"view input must be either a tuple or one these string options: {[key for key in views.keys()]}")
+
+    DEFAULT_DIR = gp_Dir(-1.75, 1.1, 5)
 
     d = {"width": 800, "height": 240, "marginLeft": 200, "marginTop": 20}
 
@@ -144,7 +162,7 @@ def getSVG(shape, opts=None):
     hlr = HLRBRep_Algo()
     hlr.Add(shape.wrapped)
 
-    projector = HLRAlgo_Projector(gp_Ax2(gp_Pnt(), DEFAULT_DIR))
+    projector = HLRAlgo_Projector(gp_Ax2(gp_Pnt(), view))
 
     hlr.Projector(projector)
     hlr.Update()

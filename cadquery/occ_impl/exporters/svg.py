@@ -35,7 +35,7 @@ SVG_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </svg>
 """
 
-ORIGIN_MARKER = """    <g transform="translate(20,%(textboxY)s)" stroke="rgb(0,0,255)">
+TRIAD = """    <g transform="translate(20,%(textboxY)s)" stroke="rgb(0,0,255)">
         <line x1="30" y1="-30" x2="75" y2="-33" stroke-width="3" stroke="#000000" />
          <text x="80" y="-30" style="stroke:#000000">X </text>
 
@@ -125,22 +125,22 @@ def getPaths(visibleShapes, hiddenShapes):
     return (hiddenPaths, visiblePaths)
 
 
-def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
+def getSVG(shape, view='legacy', hideTriad=False, opts=None):
     """
         Export a shape to SVG
     """
 
-    ORIGIN_MARKER = '' if hideOrigin else ORIGIN_MARKER
+    triad = '' if hideTriad else TRIAD
 
-    # view orientation assumes Z points upward, X ponts to the left/right, and Y points into the screen.
     views = {
-        'top' : (0, 0, -1),
-        'bottom' : (0, 0, 1),
-        'left' : (1, 0, 0),
-        'right' : (-1, 0, 0),
+        'top' : (0, 0, 1),
+        'bottom' : (0, 0, -1),
+        'left' : (-1, 0, 0),
+        'right' : (1, 0, 0),
         'front' : (0, 1, 0),
         'back' : (0, -1, 0),
-        'isometric' : (-1.75, 1.1, 5) # default to preserve backwards compatibility
+        'legacy' : (-1.75, 1.1, 5),
+        'isometric' : (1, -1, 1)
     }
 
     if isinstance(view, str) and view in views.keys():
@@ -242,7 +242,7 @@ def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
             "height": str(height),
             "textboxY": str(height - 30),
             "uom": str(uom),
-            "originMarker" : str(ORIGIN_MARKER),
+            "originMarker" : str(triad),
         }
     )
     # svg = SVG_TEMPLATE % (
@@ -251,14 +251,12 @@ def getSVG(shape, view='isometric', hideOrigin=False, opts=None):
     return svg
 
 
-def exportSVG(shape, fileName: str):
+def exportSVG(shape, fileName: str, **kwargs):
     """
         accept a cadquery shape, and export it to the provided file
         TODO: should use file-like objects, not a fileName, and/or be able to return a string instead
         export a view of a part to svg
     """
 
-    svg = getSVG(shape.val())
-    f = open(fileName, "w")
-    f.write(svg)
-    f.close()
+    with open(fileName, "w") as f:
+        f.write(getSVG(shape.val(), **kwargs))

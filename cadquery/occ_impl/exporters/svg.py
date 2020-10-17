@@ -1,7 +1,7 @@
 import io as StringIO
 
 from ..shapes import Shape, Compound, TOLERANCE
-from ..geom import BoundBox
+from ..geom import BoundBox, Vector
 
 
 from OCP.gp import gp_Ax2, gp_Pnt, gp_Dir
@@ -133,22 +133,53 @@ def getSVG(shape, view='legacy', hideTriad=False, opts=None):
     triad = '' if hideTriad else TRIAD
 
     views = {
-        'top' : (0, 0, 1),
-        'bottom' : (0, 0, -1),
-        'left' : (-1, 0, 0),
-        'right' : (1, 0, 0),
-        'front' : (0, 1, 0),
-        'back' : (0, -1, 0),
-        'legacy' : (-1.75, 1.1, 5),
-        'isometric' : (1, -1, 1)
+        'top' : {
+            'direction' : (0, 0, 1),
+            'rotations' : [0, 0, 0]
+        },
+        'bottom' : {
+            'direction' : (0, 0, -1),
+            'rotations' : [0, 0, 0]
+        },
+        'left' : {
+            'direction' : (-1, 0, 0),
+            'rotations' : [-90, 0, 0]
+        },
+        'right' : {
+            'direction' : (1, 0, 0),
+            'rotations' : [90, 0, 0]
+        },
+        'front' : {
+            'direction' : (0, 1, 0),
+            'rotations' : [0, 90, 0]
+        },
+        'back' : {
+            'direction' : (0, -1, 0),
+            'rotations' : [0, -90, 0]
+        },
+        'legacy' : {
+            'direction' : (-1.75, 1.1, 5),
+            'rotations' : [0, 0, 0]
+        },
+        'isometric' : {
+            'direction' : (1, -1, 1),
+            'rotations' : [45, -45, -45]
+        }
     }
 
     if isinstance(view, str) and view in views.keys():
-        view = gp_Dir(*views[view])
+        newDir = gp_Dir(*views[view]['direction'])
     elif isinstance(view, tuple):
-        view = gp_Dir(*view)
+        newDir = gp_Dir(*view)
     else:
         raise ValueError(f"svg.py:getSVG(): view input must be either a tuple or one these string options: {[key for key in views.keys()]}")
+
+            # e = e.rotate(center, center.add(self.plane.zDir), rotation_angle)
+
+    center = shape.Center()
+    for rotation in views[view]['rotations']:
+        if rotation != 0: 
+            shape = shape.rotate(center, center.add(Vector(views[view]['direction'])), rotation)
 
     d = {"width": 800, "height": 240, "marginLeft": 200, "marginTop": 20}
 
@@ -166,7 +197,7 @@ def getSVG(shape, view='legacy', hideTriad=False, opts=None):
     hlr = HLRBRep_Algo()
     hlr.Add(shape.wrapped)
 
-    projector = HLRAlgo_Projector(gp_Ax2(gp_Pnt(), view))
+    projector = HLRAlgo_Projector(gp_Ax2(gp_Pnt(), newDir))
 
     hlr.Projector(projector)
     hlr.Update()
